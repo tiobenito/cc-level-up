@@ -14,7 +14,7 @@
       "author": {
         "name": "Ben Battles"
       },
-      "source": ".",
+      "source": "./plugins/cc-level-up",
       "category": "productivity",
       "homepage": "https://github.com/tiobenito/cc-level-up"
     }
