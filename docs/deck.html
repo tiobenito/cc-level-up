@@ -566,44 +566,44 @@
   .level-badge.l0 {
     color: var(--text-muted);
     border-color: var(--text-muted);
-    background: rgba(100, 116, 139, 0.1);
+    background: var(--bg-deepest);
   }
   .level-badge.l1 {
     color: var(--grade-c);
     border-color: var(--grade-c);
-    background: rgba(245, 158, 11, 0.1);
+    background: var(--bg-deepest);
     box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
   }
   .level-badge.l2 {
     color: var(--accent-secondary);
     border-color: var(--accent-secondary);
-    background: rgba(56, 189, 248, 0.1);
+    background: var(--bg-deepest);
     box-shadow: 0 0 16px rgba(56, 189, 248, 0.15);
   }
   .level-badge.l3 {
     color: var(--accent);
     border-color: var(--accent);
-    background: var(--accent-glow);
+    background: var(--bg-deepest);
     box-shadow: 0 0 20px var(--accent-glow-strong);
   }
   .level-badge.l4 {
     color: var(--accent-violet);
     border-color: var(--accent-violet);
-    background: rgba(167, 139, 250, 0.1);
+    background: var(--bg-deepest);
     box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
   }
   .level-name {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 600;
     color: var(--text-primary);
     text-align: center;
   }
   .level-desc {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-secondary);
     text-align: center;
     line-height: 1.5;
-    max-width: 170px;
+    max-width: 180px;
   }
   .where-are-you {
     margin-top: 44px;
@@ -719,10 +719,11 @@
   <div class="slide active" data-slide="0">
     <div class="slide-inner">
       <h1 class="hero-title">cc-level-up</h1>
-      <p class="hero-subtitle">Setup coach for Claude Code.</p>
+      <p class="hero-subtitle">Your Claude Code personal trainer.</p>
 
-      <div class="hero-compat" style="margin-bottom: 44px;">
-        <span class="dot"></span> Works on both Claude Cowork and Claude Code (CLI)
+      <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 44px;">
+        <div class="tag" style="font-size: 13px; padding: 8px 18px; border-radius: 8px;">Claude Cowork</div>
+        <div class="tag blue" style="font-size: 13px; padding: 8px 18px; border-radius: 8px;">Claude Code (CLI)</div>
       </div>
 
       <div class="install-box">
@@ -746,8 +747,8 @@
           <div class="icon" style="color: var(--accent-warm);">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20"/><path d="M2 12h20"/></svg>
           </div>
-          <h3>You're using 20% of Claude Code</h3>
-          <p>It has skills, hooks, memory, agents, and more. Most people use almost none of it.</p>
+          <h3>Claude Code can do way more than you think</h3>
+          <p>Skills, hooks, memory, agents, MCP, plugins — there's a lot to discover.</p>
         </div>
 
         <div class="card problem-card">
@@ -762,8 +763,8 @@
           <div class="icon" style="color: var(--accent-secondary);">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
-          <h3>No system for getting better</h3>
-          <p>You learn a tip, forget it. No capture, no tracking.</p>
+          <h3>No system for learning and improving</h3>
+          <p>You find a tip, want to try it, then forget. This gives you a way to capture, track, and actually adopt new things.</p>
         </div>
 
       </div>
