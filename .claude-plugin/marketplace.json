@@ -1,0 +1,22 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "cc-level-up",
+  "description": "Level up your Claude Code setup — from beginner to expert. Detects your current level, audits your configuration, recommends improvements, and helps you teach your team.",
+  "owner": {
+    "name": "Ben Battles",
+    "email": "benbattles7@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "cc-level-up",
+      "description": "Level up your Claude Code setup — from beginner to expert. Detects your current level, audits your configuration, recommends improvements, captures resources, and helps you teach your team.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Ben Battles"
+      },
+      "source": ".",
+      "category": "productivity",
+      "homepage": "https://github.com/tiobenito/cc-level-up"
+    }
+  ]
+}

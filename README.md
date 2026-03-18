@@ -16,8 +16,8 @@ A Claude Code plugin that levels up your setup from beginner to expert. It detec
 ### From the Plugin Marketplace
 
 ```
-/plugin marketplace add tiobenito/cc-level-up-marketplace
-/plugin install cc-level-up
+/plugin marketplace add tiobenito/cc-level-up
+/plugin install cc-level-up@cc-level-up
 ```
 
 ### Local Testing
