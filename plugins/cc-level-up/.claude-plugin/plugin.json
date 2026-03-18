@@ -1,7 +1,7 @@
 {
   "name": "cc-level-up",
   "description": "Level up your Claude Code setup — from beginner to expert. Detects your current level, audits your configuration, recommends improvements, captures resources, and helps you teach your team.",
-  "author": "Ben Battles",
+  "author": { "name": "Ben Battles" },
   "version": "0.1.0",
   "homepage": "https://github.com/tiobenito/cc-level-up",
   "repository": "https://github.com/tiobenito/cc-level-up",
