@@ -4,7 +4,7 @@ cc-level-up is designed to work out of the box for individual users, but it can 
 
 ## Org Context Template
 
-When your team uses `/audit` or `/level-up`, the plugin can incorporate org-specific context — things like required MCP servers, mandatory CLAUDE.md sections, or team coding conventions.
+When your team uses `/cc-level-up`, the plugin can incorporate org-specific context — things like required MCP servers, mandatory CLAUDE.md sections, or team coding conventions.
 
 ### How to Set It Up
 

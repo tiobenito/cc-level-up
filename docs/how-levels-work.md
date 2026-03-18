@@ -91,7 +91,7 @@ You are at the frontier. You build tools for others, contribute to the ecosystem
 
 ## How Detection Works
 
-When you run `/level-up` or `/audit`, the plugin scans:
+When you run `/cc-level-up`, the plugin scans:
 
 1. **File system** — checks for the existence and content of:
    - `~/.claude/CLAUDE.md` (global instructions)

@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cc-level-up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deepest: #0a0f1a;
+    --bg-deep: #0f1629;
+    --bg-card: #151d35;
+    --bg-card-hover: #1a2440;
+    --bg-surface: #1e2a4a;
+    --bg-elevated: #243052;
+    --accent: #2dd4a8;
+    --accent-dim: #1a9e7a;
+    --accent-glow: rgba(45, 212, 168, 0.12);
+    --accent-glow-strong: rgba(45, 212, 168, 0.25);
+    --accent-secondary: #38bdf8;
+    --accent-secondary-dim: #1d8bc4;
+    --accent-warm: #f59e0b;
+    --accent-rose: #f472b6;
+    --accent-violet: #a78bfa;
+    --grade-a: #2dd4a8;
+    --grade-b: #38bdf8;
+    --grade-c: #f59e0b;
+    --grade-d: #fb923c;
+    --grade-f: #f87171;
+    --text-primary: #e8edf5;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-on-accent: #0a0f1a;
+    --border: rgba(148, 163, 184, 0.1);
+    --border-accent: rgba(45, 212, 168, 0.25);
+    --font-body: 'DM Sans', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-deepest);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---- Deck ---- */
+  .deck { width: 100%; height: 100%; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 72px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    overflow-y: auto;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ---- Progress bar ---- */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+    transition: width 0.4s ease;
+    z-index: 100;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ---- Dot nav ---- */
+  .dot-nav {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+  }
+  .dot-nav button {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+  .dot-nav button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow-strong);
+    transform: scale(1.2);
+  }
+  .dot-nav button:hover:not(.active) {
+    border-color: var(--text-secondary);
+    background: var(--bg-elevated);
+  }
+
+  /* ---- Arrow hint ---- */
+  .arrow-hint {
+    position: fixed;
+    bottom: 56px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    z-index: 100;
+    opacity: 0.6;
+  }
+
+  /* ---- Shared ---- */
+  .slide-inner {
+    max-width: 1100px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h1 {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-weight: 500;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid var(--border-accent);
+    letter-spacing: 0.3px;
+  }
+  .tag.blue {
+    background: rgba(56, 189, 248, 0.1);
+    color: var(--accent-secondary);
+    border-color: rgba(56, 189, 248, 0.25);
+  }
+
+  code, .mono {
+    font-family: var(--font-mono);
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+  }
+  .card:hover {
+    background: var(--bg-card-hover);
+  }
+
+  /* ======================== */
+  /* SLIDE 1 — HERO          */
+  /* ======================== */
+  .hero-title {
+    font-size: clamp(52px, 6vw, 80px);
+    color: var(--accent);
+    line-height: 1.05;
+    text-align: center;
+    margin-bottom: 12px;
+    text-shadow: 0 0 60px rgba(45, 212, 168, 0.2);
+  }
+  .hero-subtitle {
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: var(--text-secondary);
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .hero-pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 36px;
+  }
+  .hero-pills .tag { font-size: 13px; padding: 6px 14px; }
+
+  .hero-tagline {
+    font-size: 17px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 540px;
+    line-height: 1.6;
+    margin-bottom: 44px;
+    font-style: italic;
+  }
+
+  .install-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 2;
+    text-align: left;
+    max-width: 580px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .install-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: linear-gradient(180deg, var(--accent), var(--accent-secondary));
+    border-radius: 3px 0 0 3px;
+  }
+  .install-box .prompt { color: var(--accent); }
+  .install-box .comment { color: var(--text-muted); font-size: 11px; }
+
+  .hero-compat {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hero-compat .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: inline-block;
+  }
+
+  /* ======================== */
+  /* SLIDE 2 — THE PROBLEM   */
+  /* ======================== */
+  .problem-title {
+    font-size: clamp(28px, 3.5vw, 42px);
+    text-align: center;
+    margin-bottom: 48px;
+    color: var(--text-primary);
+  }
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    width: 100%;
+  }
+  .problem-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .problem-card:hover { transform: translateY(-4px); }
+  .problem-card .icon {
+    font-size: 28px;
+    width: 52px; height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--bg-surface);
+  }
+  .problem-card h3 {
+    font-size: 18px;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+  .problem-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 800px) {
+    .problem-grid { grid-template-columns: 1fr; max-width: 440px; }
+  }
+
+  /* ======================== */
+  /* SLIDE 3 — THE FLOW      */
+  /* ======================== */
+  .flow-title {
+    font-size: clamp(26px, 3vw, 38px);
+    text-align: center;
+    margin-bottom: 44px;
+  }
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    max-width: 820px;
+    position: relative;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 26px;
+    bottom: 26px;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-secondary), var(--accent-violet));
+    opacity: 0.4;
+  }
+  .pipe-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 14px 0;
+    position: relative;
+  }
+  .pipe-num {
+    flex-shrink: 0;
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-on-accent);
+    background: var(--accent);
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 20px var(--accent-glow-strong);
+  }
+  .pipe-num.blue {
+    background: var(--accent-secondary);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+  }
+  .pipe-num.violet {
+    background: var(--accent-violet);
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.25);
+  }
+  .pipe-body {
+    padding-top: 10px;
+  }
+  .pipe-body strong {
+    font-size: 15px;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .pipe-body span {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .pipe-body .cmd {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-accent);
+  }
+  .pipe-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0 8px 68px;
+  }
+  .pipe-divider hr {
+    flex: 1;
+    border: none;
+    border-top: 1px dashed var(--border);
+  }
+  .pipe-divider span {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  /* ======================== */
+  /* SLIDE 4 — TERMINAL MOCK */
+  /* ======================== */
+  .terminal-slide-title {
+    font-size: clamp(24px, 3vw, 36px);
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .terminal-slide-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .terminal {
+    width: 100%;
+    max-width: 740px;
+    background: #0c1120;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+      0 0 60px rgba(45, 212, 168, 0.06),
+      0 24px 80px rgba(0, 0, 0, 0.5);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .term-bar {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 12px 16px;
+    background: rgba(15, 22, 41, 0.8);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+  }
+  .term-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+  }
+  .term-dot.r { background: #f87171; }
+  .term-dot.y { background: #f59e0b; }
+  .term-dot.g { background: #2dd4a8; }
+  .term-title {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-right: 40px;
+  }
+  .term-body {
+    padding: 20px 24px 24px;
+    color: var(--text-secondary);
+    overflow-x: auto;
+  }
+  .term-body .prompt-line {
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .term-body .dim { color: var(--text-muted); }
+  .term-body .bright { color: var(--text-primary); }
+  .term-body .teal { color: var(--accent); }
+  .term-body .blue { color: var(--accent-secondary); }
+  .term-body .yellow { color: var(--accent-warm); }
+  .term-body .orange { color: var(--grade-d); }
+  .term-body .red { color: var(--grade-f); }
+  .term-body .violet { color: var(--accent-violet); }
+  .term-body .pink { color: var(--accent-rose); }
+  .term-body .gap { margin-top: 10px; }
+  .term-body .section { margin-top: 14px; }
+  .term-body .bar {
+    display: inline-block;
+    height: 8px;
+    border-radius: 4px;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  /* Grade table in terminal */
+  .grade-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+  }
+  .grade-row .label { flex: 1; }
+  .grade-row .grade {
+    width: 36px;
+    text-align: right;
+    font-weight: 600;
+  }
+  .grade-row .grade-bar {
+    width: 100px;
+    height: 6px;
+    background: rgba(148, 163, 184, 0.08);
+    border-radius: 3px;
+    margin-left: 12px;
+    overflow: hidden;
+    position: relative;
+  }
+  .grade-row .grade-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  /* ======================== */
+  /* SLIDE 5 — LEVELS        */
+  /* ======================== */
+  .levels-title {
+    font-size: clamp(26px, 3vw, 38px);
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .levels-track {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 1060px;
+    position: relative;
+  }
+  .levels-track::before {
+    content: '';
+    position: absolute;
+    top: 38px;
+    left: 40px;
+    right: 40px;
+    height: 3px;
+    background: linear-gradient(90deg,
+      var(--text-muted),
+      var(--grade-c),
+      var(--accent-secondary),
+      var(--accent),
+      var(--accent-violet));
+    border-radius: 2px;
+    opacity: 0.35;
+  }
+  .level-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 2;
+  }
+  .level-badge {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 20px;
+    border: 2px solid;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .level-card:hover .level-badge {
+    transform: scale(1.12);
+  }
+  .level-badge.l0 {
+    color: var(--text-muted);
+    border-color: var(--text-muted);
+    background: rgba(100, 116, 139, 0.1);
+  }
+  .level-badge.l1 {
+    color: var(--grade-c);
+    border-color: var(--grade-c);
+    background: rgba(245, 158, 11, 0.1);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.15);
+  }
+  .level-badge.l2 {
+    color: var(--accent-secondary);
+    border-color: var(--accent-secondary);
+    background: rgba(56, 189, 248, 0.1);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.15);
+  }
+  .level-badge.l3 {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-glow);
+    box-shadow: 0 0 20px var(--accent-glow-strong);
+  }
+  .level-badge.l4 {
+    color: var(--accent-violet);
+    border-color: var(--accent-violet);
+    background: rgba(167, 139, 250, 0.1);
+    box-shadow: 0 0 24px rgba(167, 139, 250, 0.2);
+  }
+  .level-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+  }
+  .level-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    line-height: 1.5;
+    max-width: 170px;
+  }
+  .where-are-you {
+    margin-top: 44px;
+    text-align: center;
+  }
+  .where-are-you p {
+    font-size: 20px;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .where-are-you span {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .where-are-you .cmd {
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
+
+  @media (max-width: 900px) {
+    .levels-track {
+      flex-direction: column;
+      align-items: center;
+      max-width: 400px;
+    }
+    .levels-track::before { display: none; }
+  }
+
+  /* ======================== */
+  /* SLIDE 6 — GET STARTED   */
+  /* ======================== */
+  .start-title {
+    font-size: clamp(28px, 3.5vw, 44px);
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--accent);
+  }
+  .start-install {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 36px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 2.2;
+    color: var(--text-secondary);
+    max-width: 620px;
+    width: 100%;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .start-install::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+  }
+  .start-install .prompt { color: var(--accent); }
+  .start-install .comment { color: var(--text-muted); font-size: 12px; }
+
+  .start-then {
+    font-size: 18px;
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .start-then .cmd {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 3px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border-accent);
+  }
+  .start-link {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 24px;
+    text-align: center;
+  }
+  .start-link a {
+    color: var(--accent-secondary);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+    transition: border-color 0.2s;
+  }
+  .start-link a:hover {
+    border-color: var(--accent-secondary);
+  }
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Dot navigation -->
+<div class="dot-nav" id="dotNav"></div>
+
+<!-- Arrow hint -->
+<div class="arrow-hint" id="arrowHint">Use arrow keys or click dots to navigate</div>
+
+<div class="deck" id="deck">
+
+  <!-- ======================== -->
+  <!-- SLIDE 1 — HERO           -->
+  <!-- ======================== -->
+  <div class="slide active" data-slide="0">
+    <div class="slide-inner">
+      <h1 class="hero-title">cc-level-up</h1>
+      <p class="hero-subtitle">Setup coach for Claude Code.</p>
+
+      <div class="hero-compat" style="margin-bottom: 44px;">
+        <span class="dot"></span> Works on both Claude Cowork and Claude Code (CLI)
+      </div>
+
+      <div class="install-box">
+        <div class="comment"># install the plugin</div>
+        <div><span class="prompt">/plugin</span> marketplace add tiobenito/cc-level-up</div>
+        <div><span class="prompt">/plugin</span> install cc-level-up@cc-level-up</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== -->
+  <!-- SLIDE 2 — THE PROBLEM    -->
+  <!-- ======================== -->
+  <div class="slide" data-slide="1">
+    <div class="slide-inner">
+      <h2 class="problem-title">The problem</h2>
+
+      <div class="problem-grid">
+
+        <div class="card problem-card">
+          <div class="icon" style="color: var(--accent-warm);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20"/><path d="M2 12h20"/></svg>
+          </div>
+          <h3>You're using 20% of Claude Code</h3>
+          <p>It has skills, hooks, memory, agents, and more. Most people use almost none of it.</p>
+        </div>
+
+        <div class="card problem-card">
+          <div class="icon" style="color: var(--grade-f);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <h3>No way to know what's wrong</h3>
+          <p>There's no check engine light for your setup.</p>
+        </div>
+
+        <div class="card problem-card">
+          <div class="icon" style="color: var(--accent-secondary);">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>No system for getting better</h3>
+          <p>You learn a tip, forget it. No capture, no tracking.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== -->
+  <!-- SLIDE 3 — THE FLOW       -->
+  <!-- ======================== -->
+  <div class="slide" data-slide="2">
+    <div class="slide-inner">
+      <h2 class="flow-title">How it works</h2>
+
+      <div class="pipeline">
+
+        <div class="pipe-step">
+          <div class="pipe-num">1</div>
+          <div class="pipe-body">
+            <strong>Install the plugin</strong>
+            <span>Two commands. Takes 30 seconds.</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num">2</div>
+          <div class="pipe-body">
+            <strong>Run <span class="cmd">/cc-level-up</span></strong>
+            <span>Kicks off a full scan of your setup.</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num">3</div>
+          <div class="pipe-body">
+            <strong>Get scanned across 8 areas</strong>
+            <span>CLAUDE.md, memory, skills, hooks, MCP, commands, folder structure, context budget. Each graded A through F.</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num blue">4</div>
+          <div class="pipe-body">
+            <strong>See your level (0&ndash;4)</strong>
+            <span>What's working, what's not, where you rank.</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num blue">5</div>
+          <div class="pipe-body">
+            <strong>Get 2&ndash;3 targeted recommendations</strong>
+            <span>Not generic tips. Specific actions for YOUR level and YOUR setup.</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num blue">6</div>
+          <div class="pipe-body">
+            <strong>Say yes &mdash; it builds the files for you</strong>
+            <span>Hooks, skills, configs, memory files. Created and wired up automatically.</span>
+          </div>
+        </div>
+
+        <div class="pipe-divider">
+          <hr><span>ONGOING</span><hr>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num violet">7</div>
+          <div class="pipe-body">
+            <strong>Capture what you learn with <span class="cmd">/cc-learn</span></strong>
+            <span>Read an article? Found a tip? Feed it in. It gets saved to your backlog.</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num violet">8</div>
+          <div class="pipe-body">
+            <strong>Run <span class="cmd">/cc-level-up</span> again</strong>
+            <span>See your progress. Get new recommendations. Repeat.</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== -->
+  <!-- SLIDE 4 — TERMINAL MOCK  -->
+  <!-- ======================== -->
+  <div class="slide" data-slide="3">
+    <div class="slide-inner">
+      <h2 class="terminal-slide-title">What it actually looks like</h2>
+      <p class="terminal-slide-sub">Real output from running <code style="color: var(--accent);">/cc-level-up</code></p>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="term-dot r"></div>
+          <div class="term-dot y"></div>
+          <div class="term-dot g"></div>
+          <div class="term-title">claude</div>
+        </div>
+        <div class="term-body">
+
+          <div class="prompt-line">$ /cc-level-up</div>
+
+          <div class="gap"></div>
+          <div class="dim">Scanning your setup...</div>
+          <div class="gap"></div>
+
+          <!-- Grade card -->
+          <div class="bright" style="margin-bottom: 8px;">Setup Report</div>
+
+          <div class="grade-row">
+            <span class="label dim">CLAUDE.md</span>
+            <span class="grade blue">B+</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 80%; background: var(--grade-b);"></span></span>
+          </div>
+          <div class="grade-row">
+            <span class="label dim">Memory</span>
+            <span class="grade blue">B</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 75%; background: var(--grade-b);"></span></span>
+          </div>
+          <div class="grade-row">
+            <span class="label dim">Skills</span>
+            <span class="grade yellow">C</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 55%; background: var(--grade-c);"></span></span>
+          </div>
+          <div class="grade-row">
+            <span class="label dim">Hooks</span>
+            <span class="grade orange">D</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 35%; background: var(--grade-d);"></span></span>
+          </div>
+          <div class="grade-row">
+            <span class="label dim">MCP Servers</span>
+            <span class="grade blue">B-</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 70%; background: var(--grade-b);"></span></span>
+          </div>
+          <div class="grade-row">
+            <span class="label dim">Commands &amp; Agents</span>
+            <span class="grade red">F</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 15%; background: var(--grade-f);"></span></span>
+          </div>
+          <div class="grade-row">
+            <span class="label dim">Folder Structure</span>
+            <span class="grade yellow">C+</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 60%; background: var(--grade-c);"></span></span>
+          </div>
+          <div class="grade-row">
+            <span class="label dim">Context Budget</span>
+            <span class="grade blue">B</span>
+            <span class="grade-bar"><span class="grade-bar-fill" style="width: 75%; background: var(--grade-b);"></span></span>
+          </div>
+
+          <div class="section"></div>
+          <div><span class="teal" style="font-weight: 600;">Your level: 2</span> <span class="dim">(Established)</span></div>
+
+          <div class="section"></div>
+          <div class="bright">To reach Level 3, I recommend:</div>
+          <div class="gap"></div>
+          <div><span class="teal">1.</span> <span class="dim">Add a PreToolUse hook for auto-approving safe file reads</span></div>
+          <div><span class="teal">2.</span> <span class="dim">Set up an MCP server for GitHub</span></div>
+          <div><span class="teal">3.</span> <span class="dim">Create a learnings.md for your most-used skill</span></div>
+
+          <div class="section"></div>
+          <div class="bright">Want me to build these? <span class="teal">(yes/no)</span></div>
+          <div class="gap"></div>
+          <div class="prompt-line">$ yes</div>
+          <div class="gap"></div>
+          <div class="dim">Done. Created 3 files. Run <span class="teal">/cc-level-up</span> again anytime to check progress.</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== -->
+  <!-- SLIDE 5 — LEVEL SYSTEM   -->
+  <!-- ======================== -->
+  <div class="slide" data-slide="4">
+    <div class="slide-inner">
+      <h2 class="levels-title">The Level System</h2>
+
+      <div class="levels-track">
+
+        <div class="level-card">
+          <div class="level-badge l0">0</div>
+          <div class="level-name">Getting Started</div>
+          <div class="level-desc">Just installed. No config. Default everything.</div>
+        </div>
+
+        <div class="level-card">
+          <div class="level-badge l1">1</div>
+          <div class="level-name">Foundation</div>
+          <div class="level-desc">CLAUDE.md in place. A skill or two. Basic structure.</div>
+        </div>
+
+        <div class="level-card">
+          <div class="level-badge l2">2</div>
+          <div class="level-name">Established</div>
+          <div class="level-desc">Memory system. References. Several skills. Things are working.</div>
+        </div>
+
+        <div class="level-card">
+          <div class="level-badge l3">3</div>
+          <div class="level-name">Power User</div>
+          <div class="level-desc">Hooks. MCP. Agents. Context-aware setup. Serious automation.</div>
+        </div>
+
+        <div class="level-card">
+          <div class="level-badge l4">4</div>
+          <div class="level-name">Expert</div>
+          <div class="level-desc">Learnings loop. Optimized context. Teaches others. Full system.</div>
+        </div>
+
+      </div>
+
+      <div class="where-are-you">
+        <p>Where are you?</p>
+        <span>Run <span class="cmd">/cc-level-up</span> to find out.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================== -->
+  <!-- SLIDE 6 — GET STARTED    -->
+  <!-- ======================== -->
+  <div class="slide" data-slide="5">
+    <div class="slide-inner">
+      <h2 class="start-title">Get started</h2>
+
+      <div class="start-install">
+        <div class="comment"># add from the marketplace</div>
+        <div><span class="prompt">/plugin</span> marketplace add tiobenito/cc-level-up</div>
+        <div style="margin-top: 4px;"><span class="comment"># install</span></div>
+        <div><span class="prompt">/plugin</span> install cc-level-up@cc-level-up</div>
+      </div>
+
+      <p class="start-then">Then run <span class="cmd">/cc-level-up</span> to find out where you are.</p>
+
+      <p class="start-link">
+        <a href="https://github.com/tiobenito/cc-level-up" target="_blank" rel="noopener">github.com/tiobenito/cc-level-up</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  // Build dot nav
+  const dotNav = document.getElementById('dotNav');
+  slides.forEach((_, i) => {
+    const btn = document.createElement('button');
+    btn.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    if (i === 0) btn.classList.add('active');
+    btn.addEventListener('click', () => goTo(i));
+    dotNav.appendChild(btn);
+  });
+
+  const progressBar = document.getElementById('progressBar');
+  const arrowHint = document.getElementById('arrowHint');
+
+  function goTo(n) {
+    if (n < 0 || n >= total || n === current) return;
+    slides[current].classList.remove('active');
+    dotNav.children[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    dotNav.children[current].classList.add('active');
+    progressBar.style.width = ((current + 1) / total * 100) + '%';
+
+    // Hide arrow hint after first nav
+    if (arrowHint.style.opacity !== '0') {
+      arrowHint.style.transition = 'opacity 0.5s';
+      arrowHint.style.opacity = '0';
+    }
+  }
+
+  // Set initial progress
+  progressBar.style.width = (1 / total * 100) + '%';
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goTo(current + 1) : goTo(current - 1);
+    }
+  });
+})();
+</script>
+
+</body>
+</html>

@@ -1,35 +1,46 @@
 ---
 name: cc-level-up
 description: >
-  Guided progression tool for improving your Claude Code setup. Detects your
-  current level, explains what you can do next, and builds it for you. Works for
-  both Cowork (Projects UI) and CLI users. Use when user says "level up my setup",
-  "what should I improve", "help me set up Claude", "how do I get better at Claude",
-  "improve my Claude Code", "I'm new to Claude Code", or "set up my project".
-  Do NOT trigger for improving code quality, debugging help, or general coding questions.
+  Comprehensive setup audit, grading, and guided improvement for your Claude Code
+  configuration. Scans 8 areas (CLAUDE.md, Memory & Continuity, Skills, Hooks, MCP,
+  Commands & Agents, Folder Structure & Scope, Context Budget), grades each A-F,
+  determines your level (0-4), and recommends 2-3 improvements tailored to your level.
+  Builds files/config for you if you accept. Works for both Cowork (Projects UI) and
+  CLI users. Triggers: "level up my setup", "what should I improve", "help me set up
+  Claude", "how do I get better at Claude", "improve my Claude Code", "I'm new to
+  Claude Code", "set up my project", "audit my setup", "check my CC config", "how's my
+  system", "review my Claude Code", "system health check", "score my setup", "grade my
+  setup". Do NOT trigger for auditing code, security audits, reviewing application
+  logic, improving code quality, debugging help, or general coding questions.
 ---
 
 # CC Level-Up
 
-Help the user improve their Claude Code setup one step at a time. Detect where they are, explain what's possible, and build it for them.
+Audit your Claude Code setup, grade every area, determine your level, and help you improve one step at a time.
 
 ## References
 
 - `references/level-guide.md` — Full progression path with level descriptions and detection criteria
+- `references/scoring-rubric.md` — Detailed grading criteria for each audit area, with level mappings
+- `references/feature-registry.md` — Database of CC features the audit checks against
 - `references/org-context-template.md` — Template for org-specific personalization (optional)
 - `references/templates/claude-md-starter.md` — CLAUDE.md creation guide + template
 - `references/templates/skill-starter.md` — Skill creation guide + template
 
+Read `references/scoring-rubric.md` before starting — it defines what "good" looks like for each area.
+
 ## State
 
-- **User state:** `${CLAUDE_PLUGIN_DATA}/user-state.json` — Persistent state across runs (level, history, what was built)
-- **Backlog:** `${CLAUDE_PLUGIN_DATA}/backlog.md` — What the user is already tracking (read-only, never modify)
+- **User state:** `${CLAUDE_PLUGIN_DATA}/user-state.json` — Persistent state across runs (level, grades, history, what was built)
+- **Backlog:** `${CLAUDE_PLUGIN_DATA}/backlog.md` — What the user is already tracking (managed by /cc-learn)
+- **Audit history:** `${CLAUDE_PLUGIN_DATA}/audit-history/` — Historical audit snapshots
+- **Last audit:** `${CLAUDE_PLUGIN_DATA}/last-audit.json` — Most recent audit scores for comparison
 
-Read user state at the start of every run. Write updated state at the end.
+Read user state and last audit at the start of every run. Write updated state at the end.
 
 ## Tone
 
-Friendly, encouraging, conversational. You are a helpful colleague, not an auditor. Teach real terms (CLAUDE.md, skill, reference doc, hook, MCP server) but always explain them in plain language first. Never use jargon without a one-sentence explanation.
+Friendly, encouraging, conversational. You are a helpful colleague, not a harsh auditor. Teach real terms (CLAUDE.md, skill, reference doc, hook, MCP server) but always explain them in plain language first. Never use jargon without a one-sentence explanation.
 
 ## Platform Detection
 
@@ -63,119 +74,248 @@ Before doing anything else, determine whether the user is on **Cowork** (claude.
 
 ## Performance Notes
 
+- Take your time. Thoroughness matters more than speed.
+- Read every file you audit — do not skip or summarize from file names alone.
+- Do not skip any audit area. If nothing is found, score it and note the gap.
 - Max 2-3 recommendations per run. Do not overwhelm.
-- Take your time on detection — read files, do not guess from names.
 - Always show what you built before moving to the next thing.
 - The user may not know what a "skill" is yet. Explain before asking if they want one.
 
 ---
 
-## Step 1: Detect
+## Step 1: Scan
 
-Scan the user's setup to determine their current level. Do this silently — do not narrate every file you're reading.
+Scan the environment to build a complete inventory of what exists. Do not assume any specific structure — discover it.
 
-### Read State First
+### Load Context First
 
-1. Read `${CLAUDE_PLUGIN_DATA}/user-state.json` if it exists. It contains:
-   ```json
-   {
-     "last_run_date": "2025-03-15",
-     "level": 2,
-     "level_name": "Established",
-     "platform": "cli",
-     "items_built": [
-       {"date": "2025-03-01", "type": "claude-md", "path": "CLAUDE.md"},
-       {"date": "2025-03-15", "type": "skill", "path": ".claude/skills/format-report/SKILL.md"}
-     ],
-     "recommendations_history": [
-       {"date": "2025-03-01", "title": "Create CLAUDE.md", "status": "accepted"},
-       {"date": "2025-03-15", "title": "Add behavioral rules", "status": "declined"}
-     ],
-     "next_suggested_run": "2025-04-01"
-   }
-   ```
-2. Read `${CLAUDE_PLUGIN_DATA}/backlog.md` if it exists — note what the user is already tracking so you do not duplicate suggestions.
+1. Read `${CLAUDE_PLUGIN_DATA}/user-state.json` if it exists — note previous level, grades, and history
+2. Read `${CLAUDE_PLUGIN_DATA}/last-audit.json` if it exists — for comparison with previous scores
+3. If `${CLAUDE_PLUGIN_DATA}/backlog.md` exists:
+   - Read the **Active Backlog** section — note items by status (`queued`, `ready`, `trying`)
+   - Read the **Adopted** table — know what's already working
+   - Read the **Health Metrics** section — check previous audit data if present
+   - Keep this context in mind: if a finding overlaps with a backlog item, note that it's already being tracked rather than treating it as a new discovery
 
-### What to Scan
+### Locations to Scan
 
-| What | Where (Cowork) | Where (CLI) | What it tells you |
-|------|----------------|-------------|-------------------|
-| CLAUDE.md | Project root | Repo root, `~/.claude/CLAUDE.md` | Exists? How many lines? Has behavioral rules? |
-| Skills | `skills/` | `.claude/skills/`, `~/.claude/skills/` | Count. Have frontmatter? Have references? |
-| Reference docs | `reference/` | `reference/`, `.claude/` | Exists? How many docs? |
-| Hooks | N/A | `.claude/settings.json` hooks section | Any configured? |
-| MCP servers | N/A | `.claude/settings.json` mcpServers, `mcp.json` | Any configured? |
-| Memory system | N/A | `MEMORY.md`, `.claude/memory/` | Auto-memory active? Topic files? |
-| Git integration | N/A | `.git/` | Is this a git repo? |
-| Subfolder CLAUDE.md | Subdirectories | Subdirectories | Any scoped instructions? |
-| Folder organization | Project root | Project root | Beyond defaults? |
+| What | Where to look |
+|------|---------------|
+| Global instructions | `~/.claude/CLAUDE.md` |
+| Global settings | `~/.claude/settings.json` |
+| Global keybindings | `~/.claude/keybindings.json` |
+| Global MCP config | `~/.claude/.mcp.json` |
+| Skills | `~/.claude/skills/*/SKILL.md` |
+| Agents | `~/.claude/agents/*.md` |
+| Commands | `~/.claude/commands/*.md` |
+| Plugins | `enabledPlugins` in `~/.claude/settings.json` |
+| Project instructions | `CLAUDE.md` in project root and subdirectories |
+| Project MCP config | `.mcp.json` in project root |
+| Auto-memory | `~/.claude/projects/*/memory/` (search all project dirs) |
+| Handover files | `HANDOVER.md` or similar in project root |
+| Hooks | `hooks` key in `~/.claude/settings.json` |
 
-Use Glob and Read tools. Record findings internally.
+Use Glob and Read tools to discover files. Record what exists and what doesn't. Do this silently — do not narrate every file you're reading.
 
-### Level Assignment
+### Audit Each Area
 
-Assign the highest level where ALL criteria are met. Refer to `references/level-guide.md` for the full guide, but here is the summary:
+For each area below, evaluate what was found during discovery. Assign a letter grade (A/B/C/D/F) using the criteria in `references/scoring-rubric.md`. If an area has no files at all, grade it F or N/A and recommend setup.
 
-**Level 0 — Getting Started**
-- No CLAUDE.md (or under 5 lines)
-- 0-1 skills
-- Fresh install or minimal setup
+#### Area 1: CLAUDE.md Files
 
-**Level 1 — Foundation**
-- Has a CLAUDE.md with at least a role/project description (5+ lines)
-- 2-3 skills with basic structure
+Evaluate all CLAUDE.md files (global + project + nested).
 
-**Level 2 — Established**
-- CLAUDE.md has behavioral rules (15+ lines with "always/never" instructions, format preferences, or workflow rules)
-- Reference folder with 2+ docs
-- 4+ skills
-- CLI: May have basic hooks or 1 MCP server
+**Check for:**
+- Clear structure with headers and sections
+- Accurate, non-stale content (references to files/tools that still exist)
+- No broken pointers (paths that don't resolve)
+- Appropriate length (global: under 200 lines preferred; project: under 150 lines)
+- No duplication across files (same instructions in multiple places)
+- Separation of concerns (global = cross-project rules, project = project-specific)
 
-**Level 3 — Power User**
-- Well-organized folder structure
-- Skills have their own reference files or output templates
-- 6+ skills with good structure
-- CLI: Hooks configured + MCP servers + custom commands or agents
-- Cowork: Subfolder CLAUDE.md files, session notes workflow
+#### Area 2: Memory & Session Continuity
 
-**Level 4 — Expert**
-- Complete, well-organized system
-- Demonstrates system thinking (files reference each other, clear separation of concerns)
-- CLI: Learnings loop (learnings.md files), scoring checklists, optimized context loading, plugin-level organization
-- Cowork: Mature system with advanced skill patterns, cross-referencing, maintenance habits
+Audit the full persistence system: auto-memory, topic files, and any session continuity mechanisms (handover files, etc.).
+
+**Memory checks:**
+- MEMORY.md exists and is under 200 lines (auto-loaded limit)
+- Index references actual topic files that exist
+- Topic files are organized by subject, not chronologically
+- No duplication between memory files and CLAUDE.md files
+- Staleness — content that references outdated dates, completed projects, or obsolete tools
+- Information is routed to the right layer (rules in CLAUDE.md, state in memory)
+
+**Session continuity checks (if handover/session mechanism exists):**
+- Handover file freshness (check the date if present)
+- Completeness (does it cover: what was done, decisions, next steps?)
+- Update mechanism (is there a command or trigger to update it?)
+- Connection to memory (does the handover feed into persistent memory, not just sit on its own?)
+
+If no session continuity mechanism exists, note the gap but do not penalize heavily — it's an advanced pattern, not a requirement.
+
+#### Area 3: Skills
+
+Inventory all skills in `~/.claude/skills/`.
+
+**Check for:**
+- Each skill has a valid SKILL.md with YAML frontmatter
+- Description includes BOTH what it does AND trigger phrases
+- No skill name uses spaces, capitals, or underscores
+- Body is under 500 lines (progressive disclosure via references/)
+- References files exist if SKILL.md mentions them
+- Learnings files exist for skills that have been used and refined
+- No unused/abandoned skills (folders with placeholder content)
+
+#### Area 4: Hooks
+
+Read hooks configuration from settings.json.
+
+**Check for:**
+- What hooks are configured and what events they cover
+- Hook event coverage: PreToolUse, PostToolUse, SessionStart, Stop, Notification
+- Missed automation opportunities (common manual patterns that could be hooks)
+- Any hooks that might be stale or broken (referencing scripts that don't exist)
+
+#### Area 5: MCP Servers
+
+Read both global and project MCP configs.
+
+**Check for:**
+- Configured servers and their types (stdio, HTTP)
+- Missing common integrations (GitHub, Linear, Notion, Slack — based on what the project uses)
+- Duplicate server configurations between global and project
+- Server naming consistency
+
+#### Area 6: Commands & Agents
+
+Inventory commands in `~/.claude/commands/` and agents in `~/.claude/agents/`.
+
+**Check for:**
+- Commands have clear descriptions
+- Agents have defined roles and tool access
+- No overlap between commands and skills (commands should be lightweight triggers)
+- Unused or placeholder agents/commands
+
+#### Area 7: Folder Structure & Scope
+
+Evaluate `~/.claude/` organization AND whether things are at the right scope (global vs. project). This is one of the most common sources of confusion and bugs.
+
+**Folder organization checks:**
+- Clear separation of concerns (skills, commands, agents, config)
+- Scratch/temp directories are gitignored
+- No stale files in active directories
+- Logical nesting (not too flat, not too deep)
+- CLAUDE.md files in subdirectories where they add value
+
+**Global vs. project scope checks (CRITICAL — most people get this wrong):**
+- Skills in `~/.claude/skills/` load for EVERY session across ALL projects. Are any of them project-specific and should be in `.claude/skills/` within the project instead?
+- Hooks in `~/.claude/settings.json` fire for EVERY session. Are any hooks project-specific? (They should be in the project's `.claude/settings.local.json` or a plugin)
+- `settings.json` is the global config. If the user has `CLAUDE_CONFIG_DIR` set (e.g., via aliases for multi-account setups), check whether `settings.json` is symlinked or duplicated — duplicated settings files silently break when one gets updated and the other doesn't
+- MCP servers in `~/.claude/.mcp.json` connect for every project. Project-specific servers should be in the project's `.mcp.json`
+- Global CLAUDE.md should contain only cross-project rules. Project-specific instructions belong in the project's CLAUDE.md, not the global one
+- Check for context budget waste: skills/instructions loaded globally that only apply to one project
+
+#### Area 8: Context Budget
+
+Calculate total auto-loaded tokens per session.
+
+**Measure:**
+- Global CLAUDE.md: count lines
+- Project CLAUDE.md: count lines (root + any auto-loaded nested)
+- MEMORY.md: count lines (first 200 are auto-loaded)
+- Total auto-loaded lines across all sources
+
+**Evaluate:**
+- Is the total reasonable? (Under 400 lines is good, 400-600 is acceptable, 600+ needs optimization)
+- Is each file earning its context cost? (Does every section justify being auto-loaded?)
+- Could any content move to on-demand files (references, topic files)?
 
 ---
 
-## Step 2: Present
+## Step 2: Grade
 
-Show the user their level and what is next. Keep it warm and concise.
+Assign each area a letter grade using `references/scoring-rubric.md`:
+- **A**: Excellent — well-optimized, follows best practices
+- **B**: Good — functional with minor improvements possible
+- **C**: Adequate — works but has clear optimization opportunities
+- **D**: Needs Work — significant gaps or inefficiencies
+- **F**: Missing/Broken — not configured or non-functional
+- **N/A**: Not present — recommend setup if valuable
+
+Use +/- modifiers for nuance (A-, B+, etc.).
+
+Calculate overall score:
+1. Convert each applicable grade to a number: A=95, A-=92, B+=88, B=85, B-=82, C+=78, C=75, C-=72, D+=68, D=65, D-=62, F=50
+2. Average all applicable scores (skip N/A areas)
+3. Convert back to letter grade with +/- modifier
+
+---
+
+## Step 3: Level
+
+Based on the grades, determine the user's level (0-4) using the level mapping from `references/scoring-rubric.md`:
+
+| Level | Grade Range | Description |
+|-------|-------------|-------------|
+| Level 0 — Getting Started | F-D | Not using features, or configuration is broken/missing |
+| Level 1 — Foundations | D-C | Basic setup exists but has significant gaps or is underutilized |
+| Level 2 — Intermediate | C-B | Features actively used with reasonable configuration, room for optimization |
+| Level 3 — Advanced | B-A | Well-configured, follows best practices, integrated into workflow |
+| Level 4 — Expert | A+ | Fully optimized, advanced patterns, progressive disclosure, active feedback loops |
+
+**Overall level** is determined by the lowest area that the user actively uses. A user with nine B grades is more proficient than one with five A grades and four F grades.
+
+Also refer to `references/level-guide.md` for the full detection criteria at each level.
+
+---
+
+## Step 4: Report
+
+Show the user their level, their grades per area, and what's working vs what needs improvement.
 
 ### Format
 
-Start with a greeting and their level:
+Start with a warm greeting and their level:
 
 > **Your setup: [Level Name]** (Level [N] of 4)
 >
 > [One sentence about what this level means — from level-guide.md]
 
-If this is a returning user (user-state.json has previous data), celebrate progress:
+If this is a returning user (user-state.json or last-audit.json has previous data), show progress:
 
-> Since last time: [what changed — new skills added, CLAUDE.md grew, new hooks configured]
+> Since last time: [what changed — score improvements, regressions, new things added]
 
-Then show 2-3 recommendations as cards:
+Then show the grade card:
 
-> **Here's what I'd suggest next:**
->
-> **1. [Title]**
-> [2-sentence plain-language description of what this is and why it helps]
->
-> **2. [Title]**
-> [2-sentence plain-language description]
->
-> **3. [Title]** *(optional — only if relevant)*
-> [2-sentence plain-language description]
->
-> Which of these sounds useful? I can set any of them up for you right now.
+```
+| Area | Grade | Key Finding |
+|------|-------|-------------|
+| CLAUDE.md Files | [grade] | [one-line summary] |
+| Memory & Session Continuity | [grade] | [one-line summary] |
+| Skills | [grade] | [one-line summary] |
+| Hooks | [grade] | [one-line summary] |
+| MCP Servers | [grade] | [one-line summary] |
+| Commands & Agents | [grade] | [one-line summary] |
+| Folder Structure & Scope | [grade] | [one-line summary] |
+| Context Budget | [grade] | [total lines] auto-loaded |
+```
+
+Then for each area, show a brief summary of what's working well and what issues were found. Include specific file paths and line numbers for issues. Do not output the full detailed audit report by default — keep it concise. If the user wants more detail on any area, they can ask.
+
+If previous audit data exists in `${CLAUDE_PLUGIN_DATA}/last-audit.json`, diff the scores and highlight what improved or regressed. If no previous audit, note "First audit — no comparison available."
+
+---
+
+## Step 5: Recommend
+
+Based on their level, pick 2-3 improvements that are appropriate. Do not overwhelm. Focus on what moves them to the next level.
+
+### Recommendation Priority Framework
+
+1. **Quick wins**: High impact, low effort (e.g., fixing a broken pointer, removing duplication)
+2. **Strategic upgrades**: High impact, medium effort (e.g., setting up memory system, creating a missing skill)
+3. **Nice to have**: Medium impact, low effort (e.g., adding keybindings, reorganizing folders)
+4. **Advanced**: High impact, high effort (e.g., custom MCP server, agent team workflows)
 
 ### What to Recommend at Each Level
 
@@ -228,9 +368,24 @@ Recommendations differ by platform. Always check the backlog to avoid suggesting
 2. Scoring checklists — "Create checklists that score output quality. Skills can self-evaluate against criteria you define."
 3. Plugin-level organization — "Package your setup so others can use it. Skills, hooks, and configuration as a shareable unit."
 
+### Presenting Recommendations
+
+> **Here's what I'd suggest next:**
+>
+> **1. [Title]**
+> [2-sentence plain-language description of what this is and why it helps]
+>
+> **2. [Title]**
+> [2-sentence plain-language description]
+>
+> **3. [Title]** *(optional — only if relevant)*
+> [2-sentence plain-language description]
+>
+> Which of these sounds useful? I can set any of them up for you right now.
+
 ---
 
-## Step 3: Build
+## Step 6: Build
 
 For each recommendation the user accepts, follow the **Explain + Build** pattern.
 
@@ -305,11 +460,13 @@ For each recommendation the user accepts, follow the **Explain + Build** pattern
 
 ---
 
-## Step 4: Save State
+## Step 7: Save State
 
-After building everything the user requested, update `${CLAUDE_PLUGIN_DATA}/user-state.json`.
+After the report and any building, save state for progress tracking.
 
-### What to Save
+### 1. Update user state
+
+Write `${CLAUDE_PLUGIN_DATA}/user-state.json`:
 
 ```json
 {
@@ -318,6 +475,17 @@ After building everything the user requested, update `${CLAUDE_PLUGIN_DATA}/user
   "level_name": "[Level Name]",
   "previous_level": "[N from last run, or null if first run]",
   "platform": "[cowork or cli]",
+  "grades": {
+    "claude_md": "[grade]",
+    "memory": "[grade]",
+    "skills": "[grade]",
+    "hooks": "[grade]",
+    "mcp_servers": "[grade]",
+    "commands_agents": "[grade]",
+    "folder_structure": "[grade]",
+    "context_budget": "[grade]"
+  },
+  "overall_score": { "grade": "[grade]", "percentage": "[N]" },
   "items_built": [
     "...previous items...",
     {"date": "[today]", "type": "[claude-md|skill|reference|hook|mcp|other]", "path": "[filepath]", "description": "[one line]"}
@@ -330,6 +498,58 @@ After building everything the user requested, update `${CLAUDE_PLUGIN_DATA}/user
 }
 ```
 
+### 2. Save audit snapshot
+
+Write a snapshot to `${CLAUDE_PLUGIN_DATA}/audit-history/YYYY-MM-DD.md` containing the grade card, key findings for each area, and top recommendations. This becomes the historical record.
+
+### 3. Update last audit state
+
+Write `${CLAUDE_PLUGIN_DATA}/last-audit.json` with:
+
+```json
+{
+  "date": "YYYY-MM-DD",
+  "overall_score": { "grade": "[grade]", "percentage": "[N]" },
+  "areas": {
+    "claude_md": { "grade": "[grade]", "score": "[N]", "notes": "..." },
+    "memory": { "grade": "[grade]", "score": "[N]", "notes": "..." },
+    "skills": { "grade": "[grade]", "score": "[N]", "notes": "..." },
+    "hooks": { "grade": "[grade]", "score": "[N]", "notes": "..." },
+    "mcp_servers": { "grade": "[grade]", "score": "[N]", "notes": "..." },
+    "commands_agents": { "grade": "[grade]", "score": "[N]", "notes": "..." },
+    "folder_structure": { "grade": "[grade]", "score": "[N]", "notes": "..." },
+    "context_budget": { "grade": "[grade]", "score": "[N]", "notes": "..." }
+  },
+  "key_metrics": {
+    "total_auto_loaded_lines": 0,
+    "skill_count": 0,
+    "skills_with_learnings": 0,
+    "hook_count": 0,
+    "mcp_server_count": 0,
+    "command_count": 0,
+    "agent_count": 0,
+    "broken_pointers": 0
+  },
+  "top_recommendations": ["...", "...", "..."]
+}
+```
+
+### 4. Write health metrics to backlog
+
+If `${CLAUDE_PLUGIN_DATA}/backlog.md` exists, update its `## Health Metrics` section with:
+- `Last audit` -> today's date
+- `Overall score` -> the overall grade from this audit
+- `Top gap` -> the lowest-scoring area and its grade
+- `Skills with learnings` -> count of skills with non-empty learnings.md / total skills
+- `Backlog items stale 2+ weeks` -> count of `ready` or `trying` items older than 14 days
+
+Also sync new recommendations to the backlog:
+- For each recommendation that represents a feature adoption opportunity (new skill, new hook, new workflow pattern):
+  - Check if it already exists in the Active Backlog (match by name or concept)
+  - If already tracked: update the item's context, do NOT create a duplicate
+  - If NOT tracked: add as a new backlog item with status `queued`
+  - Do NOT add purely structural recommendations (e.g., "shorten CLAUDE.md") — only feature adoption opportunities
+
 ### Closing Message
 
 End with something encouraging and forward-looking:
@@ -339,3 +559,14 @@ End with something encouraging and forward-looking:
 If the user has a backlog, mention it:
 
 > I noticed you're already tracking some things in your backlog — [brief mention]. Those are great next steps too.
+
+---
+
+## When to Suggest Running This
+
+- User asks "how's my setup?" or "what should I improve?"
+- After a major Claude Code version update
+- Setup feels stale or disorganized
+- Periodically (monthly is a good cadence)
+- After significant configuration changes (new skills, new MCP servers, etc.)
+- User is new to Claude Code and wants to get started

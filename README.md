@@ -4,9 +4,9 @@ A Claude Code plugin that levels up your setup from beginner to expert. It detec
 
 ## What It Does
 
-- **Detects your CC level** (0-4) by scanning your config, skills, hooks, and usage patterns
-- **Audits your setup** and finds gaps between your current config and best practices
-- **Recommends next steps** tailored to your level so you improve incrementally
+- **Audits, grades, and levels your CC setup** (0-4) by scanning 8 areas of your config, skills, hooks, and usage patterns — each graded A-F
+- **Recommends next steps** tailored to your level so you improve incrementally (max 2-3 at a time)
+- **Builds improvements for you** — creates files and config based on your answers
 - **Tracks your feature backlog** — what you've adopted, what you're trying, what's queued
 - **Helps you teach** — package your CC knowledge into shareable guides for your team
 - **Captures learnings** — automatically logs skill usage and reminds you to capture tips
@@ -36,10 +36,9 @@ Add to your `~/.claude/settings.json` under `enabledPlugins`:
 
 | Command | What It Does |
 |---------|-------------|
-| `/level-up` | Detect your CC level and get personalized recommendations |
-| `/audit` | Deep audit of your setup — find gaps and improvements |
-| `/cc-teach` | Package your CC knowledge into training materials |
-| `/learn` | Capture a resource, tip, or article into your backlog |
+| `/cc-level-up` | Audit your setup (8 areas, graded A-F), determine your level, recommend improvements, and build them for you |
+| `/cc-learn` | Capture a resource, tip, or article into your improvement backlog |
+| `/cc-teach` | Package your CC knowledge into training materials for your team |
 
 ## The Level System
 
@@ -71,7 +70,9 @@ The plugin stores its data in `${CLAUDE_PLUGIN_DATA}/`:
 |------|---------|
 | `backlog.md` | Feature adoption tracker (queued, ready, trying, adopted) |
 | `usage-log.jsonl` | Skill invocation log for analytics |
-| `last-audit.json` | Timestamp of most recent setup audit |
+| `last-audit.json` | Most recent audit scores and metrics |
+| `user-state.json` | Persistent user state (level, grades, history) |
+| `audit-history/` | Historical audit snapshots by date |
 
 ## Customization
 

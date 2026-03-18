@@ -1,5 +1,5 @@
 ---
-name: learn
+name: cc-learn
 description: >
   Capture Claude Code articles, tips, features, and resources into a structured
   adoption backlog. Route new discoveries to the right format (backlog item vs.

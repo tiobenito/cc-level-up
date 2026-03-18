@@ -139,7 +139,7 @@ def main():
     days_since = check_audit_staleness(audit_path)
     if days_since is not None:
         messages.append(
-            f"It's been {days_since} days since your last setup audit. Try /audit."
+            f"It's been {days_since} days since your last setup audit. Try /cc-level-up."
         )
 
     if messages:

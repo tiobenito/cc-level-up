@@ -2,7 +2,7 @@
 
 Track Claude Code features, tips, and practices you want to adopt. Items flow through statuses: **queued** (captured) -> **ready** (prioritized) -> **trying** (experimenting) -> **adopted** (part of your workflow) or **dropped** (not for you).
 
-Use `/learn` or say "add to backlog" to capture new items. Say "show my backlog" or "what should I work on next" to review.
+Use `/cc-learn` or say "add to backlog" to capture new items. Say "show my backlog" or "what should I work on next" to review.
 
 ---
 

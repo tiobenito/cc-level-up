@@ -1,6 +1,6 @@
 ---
 name: cc-teach
-description: "Package Claude Code knowledge into shareable training materials, config guides, or onboarding docs for teammates. Use when user says 'share my CC setup', 'create a training guide', 'teach my team Claude Code', 'document this skill', 'onboard someone to CC', 'export my config', or wants to export their setup or skills for others. Do NOT use for improving the user's own setup (use cc-level-up or cc-audit instead)."
+description: "Package Claude Code knowledge into shareable training materials, config guides, or onboarding docs for teammates. Use when user says 'share my CC setup', 'create a training guide', 'teach my team Claude Code', 'document this skill', 'onboard someone to CC', 'export my config', or wants to export their setup or skills for others. Do NOT use for improving the user's own setup (use cc-level-up instead)."
 ---
 
 # CC Teach Skill
