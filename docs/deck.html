@@ -727,7 +727,7 @@
       </div>
 
       <div class="install-box">
-        <div class="comment"># install the plugin</div>
+        <div class="comment"># run from any directory — installs globally across all your projects</div>
         <div><span class="prompt">/plugin</span> marketplace add tiobenito/cc-level-up</div>
         <div><span class="prompt">/plugin</span> install cc-level-up@cc-level-up</div>
       </div>
@@ -801,6 +801,9 @@
           <div class="pipe-body">
             <strong>Get scanned across 8 areas</strong>
             <span>CLAUDE.md, memory, skills, hooks, MCP, commands, folder structure, context budget. Each graded A through F.</span>
+            <span style="display: block; margin-top: 8px; font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+              Reads config files only — <code style="font-size: 11px;">~/.claude/</code>, CLAUDE.md files, settings.json. Never touches your project code, credentials, or data. Nothing leaves your machine. After scanning, you'll see exactly which files were read.
+            </span>
           </div>
         </div>
 
@@ -873,6 +876,7 @@
 
           <div class="gap"></div>
           <div class="dim">Scanning your setup...</div>
+          <div class="dim" style="font-size: 11px; margin-top: 2px; color: var(--text-muted);">Scanned: ~/.claude/CLAUDE.md &middot; settings.json &middot; 3 skills &middot; 0 hooks &middot; 2 MCP servers &middot; 4 project CLAUDE.mds</div>
           <div class="gap"></div>
 
           <!-- Grade card -->
@@ -998,11 +1002,16 @@
       <h2 class="start-title">Get started</h2>
 
       <div class="start-install">
-        <div class="comment"># add from the marketplace</div>
+        <div class="comment"># run from any directory — installs globally (works across all your projects)</div>
         <div><span class="prompt">/plugin</span> marketplace add tiobenito/cc-level-up</div>
         <div style="margin-top: 4px;"><span class="comment"># install</span></div>
         <div><span class="prompt">/plugin</span> install cc-level-up@cc-level-up</div>
       </div>
+
+      <p style="font-size: 13px; color: var(--text-muted); text-align: center; max-width: 500px; line-height: 1.7; margin-bottom: 28px;">
+        Reads your Claude Code config files only — CLAUDE.md, settings.json, skills, hooks.<br>
+        Never reads your project code or credentials. Nothing leaves your machine.
+      </p>
 
       <p class="start-then">Then run <span class="cmd">/cc-level-up</span> to find out where you are.</p>
 
