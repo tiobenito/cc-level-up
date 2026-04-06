@@ -15,10 +15,14 @@ A Claude Code plugin that levels up your setup from beginner to expert. It detec
 
 ### From the Plugin Marketplace
 
+Run these from any directory — they install globally to your user config and work across all your projects:
+
 ```
 /plugin marketplace add tiobenito/cc-level-up
 /plugin install cc-level-up@cc-level-up
 ```
+
+> **Privacy note:** cc-level-up reads your Claude Code config files only (`~/.claude/`, CLAUDE.md files, settings.json, skills, hooks). It never reads your project code, credentials, or personal data. Nothing leaves your machine. After each scan, you'll see a summary of exactly which files were read.
 
 ### Local Testing
 
